@@ -35,7 +35,7 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
         x: I.getX() + dx,
         y: I.getY() + dy,
         duration: 1,
-        onFinished: function() {
+        onFinish: function() {
           moveQueue.next();
         }
       })).play();
