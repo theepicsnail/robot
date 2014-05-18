@@ -1,5 +1,5 @@
 // Create a 'Robot' class that extends a group of kinetic objects
-define(["Kinetic", "pubsub"], function(Kinetic, pubsub) {
+define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
   var Robot = function (config) {
     window.robot = this;
     // super constructor
@@ -14,39 +14,9 @@ define(["Kinetic", "pubsub"], function(Kinetic, pubsub) {
     // Instance stuff
     var I = this;
     this.dir = config.dir || Robot.Dir.UP;
-    this.move = function(dx, dy) {
-      console.log("Move:", dy, dx);
-      (new Kinetic.Tween({
-        node: I,
-        x: I.getX() + dx,
-        y: I.getY() + dy,
-        duration: 1
-      })).play();
-    };
 
-    this.turn = function(dr) {
-      (new Kinetic.Tween({
-        node: I,
-        rotationDeg: I.getRotationDeg() + dr,
-        duration: 1,
-        onFinish: function() {
-          deg = I.getRotationDeg() % 360;
-          if (deg < 0) {
-            deg += 360;
-          }
-          I.setRotationDeg(deg);
-          switch(deg) {
-            case 0: I.dir = Robot.Dir.UP; break;
-            case 90: I.dir = Robot.Dir.RIGHT; break;
-            case 180: I.dir = Robot.Dir.DOWN; break;
-            case 270: I.dir = Robot.Dir.LEFT; break;
-          }
-        }
-      })).play();
-    };
-
-    // Listeners
-    pubsub.subscribe("robot.move", function(msg, data) {
+    // Moving
+    var moveQueue = new Queue("robot.move", function(msg, data) {
       var dy = 0, dx = 0;
       switch(I.dir) {
         case Robot.Dir.UP:  dy = -1; break;
@@ -54,17 +24,56 @@ define(["Kinetic", "pubsub"], function(Kinetic, pubsub) {
         case Robot.Dir.LEFT: dx = -1; break;
         case Robot.Dir.RIGHT: dx = 1; break;
       }
-      switch(data) {
-        case Robot.Move.FORWARD: I.move(dx, dy); break;
-        case Robot.Move.BACKWARD: I.move(-dx, -dy); break;
+
+      if (data === Robot.Move.BACKWARD) {
+        dx *= -1;
+        dy *= -1;
       }
+
+      (new Kinetic.Tween({
+        node: I,
+        x: I.getX() + dx,
+        y: I.getY() + dy,
+        duration: 1,
+        onFinished: function() {
+          moveQueue.next();
+        }
+      })).play();
+
     });
-    pubsub.subscribe("robot.turn", function(msg, data) {
-      switch(data) {
-        case Robot.Turn.LEFT: I.turn(-90); break;
-        case Robot.Turn.RIGHT: I.turn(90); break;
+
+    // Turning
+    var turnQueue = new Queue("robot.turn", function(msg, data) {
+      var angle = 90;
+      if (data === Robot.Turn.LEFT) {
+        angle = -90;
       }
+
+      (new Kinetic.Tween({
+        node: I,
+        rotationDeg: I.getRotationDeg() + angle,
+        duration: 1,
+        onFinish: function() {
+          deg = I.getRotationDeg() % 360;
+          if (deg < 0) {
+            deg += 360;
+          }
+          if (deg % 90 !== 0) {
+            deg = 0;
+          }
+
+          I.setRotationDeg(deg);
+          switch(deg) {
+            case 0: I.dir = Robot.Dir.UP; break;
+            case 90: I.dir = Robot.Dir.RIGHT; break;
+            case 180: I.dir = Robot.Dir.DOWN; break;
+            case 270: I.dir = Robot.Dir.LEFT; break;
+          }
+          turnQueue.next();
+        }
+      })).play();
     });
+
 
     // Kinetic object stuff
     this.add(new Kinetic.Rect({ // Body
