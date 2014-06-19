@@ -14,9 +14,16 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
     // Instance stuff
     var I = this;
     this.dir = config.dir || Robot.Dir.UP;
-
     // Moving
-    var moveQueue = new Queue("robot.move", function(msg, data) {
+    var actionQueue = new Queue("robot", function(msg, data) {
+      console.log("action:", msg, data);
+      if (msg == "robot.move") {
+        I.move(data, actionQueue.next);
+      } else if (msg == "robot.turn") {
+        I.turn(data, actionQueue.next);
+      }
+    });
+    this.move = function(data, onFinish) {
       var dy = 0, dx = 0;
       switch(I.dir) {
         case Robot.Dir.UP:  dy = -1; break;
@@ -34,16 +41,14 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
         node: I,
         x: I.getX() + dx,
         y: I.getY() + dy,
-        duration: 1,
-        onFinish: function() {
-          moveQueue.next();
-        }
+        duration: 1/2,
+        onFinish: onFinish
       })).play();
 
-    });
+    };
 
     // Turning
-    var turnQueue = new Queue("robot.turn", function(msg, data) {
+    this.turn = function(data, onFinish) {
       var angle = 90;
       if (data === Robot.Turn.LEFT) {
         angle = -90;
@@ -52,7 +57,7 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
       (new Kinetic.Tween({
         node: I,
         rotationDeg: I.getRotationDeg() + angle,
-        duration: 1,
+        duration: 1/2,
         onFinish: function() {
           deg = I.getRotationDeg() % 360;
           if (deg < 0) {
@@ -69,10 +74,10 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
             case 180: I.dir = Robot.Dir.DOWN; break;
             case 270: I.dir = Robot.Dir.LEFT; break;
           }
-          turnQueue.next();
+          onFinish();
         }
       })).play();
-    });
+    };
 
 
     // Kinetic object stuff

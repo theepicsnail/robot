@@ -17,6 +17,7 @@ define(["Kinetic"], function (K) {
     exports.point_img = point_img;
     point_img.onload = callback;
     point_img.src = "resources/cross.png";
+    //point_img.src = "resources/tile.jpg";
   };
 
   /*

@@ -7,8 +7,10 @@
 define(["Kinetic"], function (Kinetic) {
   var stage = new Kinetic.Stage({
     container: 'container',
+    x:0, y:0,
     width: 500,
-    height: 500
+    height: 500,
+    fill: 'blue'
   });
 
   return stage;
