@@ -1,15 +1,8 @@
 // Create a 'Robot' class that extends a group of kinetic objects
 define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
-  var Robot = function (config) {
-    window.robot = this;
-    // super constructor
-    config.offset=[1/2, 1/2];
-    Kinetic.Group.call(this, config);
+ /* var Robot = function (config) {
 
     // Static stuff
-    Robot.Dir = {UP:1, RIGHT:2, DOWN:3, LEFT:4};
-    Robot.Move = {FORWARD:"forward", BACKWARD:"backward"};
-    Robot.Turn = {LEFT:"left", RIGHT:"right"};
 
     // Instance stuff
     var I = this;
@@ -17,9 +10,9 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
     // Moving
     var actionQueue = new Queue("robot", function(msg, data) {
       console.log("action:", msg, data);
-      if (msg == "robot.move") {
+      if (msg === "robot.move") {
         I.move(data, actionQueue.next);
-      } else if (msg == "robot.turn") {
+      } else if (msg === "robot.turn") {
         I.turn(data, actionQueue.next);
       }
     });
@@ -80,21 +73,55 @@ define(["Kinetic", "pubsubqueue", "pubsub"], function(Kinetic, Queue, pubsub) {
     };
 
 
-    // Kinetic object stuff
-    this.add(new Kinetic.Rect({ // Body
-      x:0.25, y:0.25, width:0.5, height:0.5,
-      fill: "gray", strokeWidth:0.01
-    }));
-    this.add(new Kinetic.Line({ // Pusher arm
-      points:[1/2, 1/4,
-              1/2, 1/8,
-              1/4, 1/8,
-              3/4, 1/8],
-      strokeWidth:0.01,
-      stroke: "black"
-    }));
+  return Robot;*/
 
+  superClass = Kinetic.Group;
+
+  Robot = function(config) {
+    config.width = 1;
+    config.height =1;
+    config.offsetX = 0.5;
+    config.offsetY = 0.5;
+    config.fill ='green';
+    this.__robot_init(config);
   };
-  Kinetic.Util.extend(Robot, Kinetic.Group);
+  Robot.prototype = {
+    __robot_init:function(config) {
+      superClass.call(this, config);
+      this.className = "Robot";
+
+      this.add(new Kinetic.Rect({ // Body
+        x:0.25, y:0.25, width:0.5, height:0.5,
+        stroke:"black",
+        fill: "gray", strokeWidth:0.01
+      }));
+      this.add(new Kinetic.Line({ // Pusher arm
+        points:[1/2, 1/4,
+                1/2, 1/8,
+                1/4, 1/8,
+                3/4, 1/8],
+        strokeWidth:0.01,
+        stroke: "black"
+      }));
+
+    },
+    turn: function(dir) {
+      var self = this;
+      console.log(this.getRotationDeg(), dir);
+      (new Kinetic.Tween({
+        node: this,
+        rotationDeg: this.getRotationDeg() + 90 * dir,
+        duration: 1/2,
+        onFinish: function() {
+          self.setRotationDeg(
+          (self.getRotationDeg() + 360) % 360);
+        }
+      })).play();
+    }
+  };
+  Kinetic.Util.extend(Robot, superClass);
+  Kinetic.Collection.mapMethods(Robot);
+
+
   return Robot;
 });

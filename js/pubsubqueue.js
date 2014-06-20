@@ -8,7 +8,6 @@ define(["pubsub"], function(pubsub) {
     var self = this;
     this.running = false;
     this.queue = [];
-
     var id = pubsub.subscribe(channel, function(msg, data) {
       self.queue.push(function() {
         callback(msg, data);

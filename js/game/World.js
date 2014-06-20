@@ -8,7 +8,7 @@ define(["pubsub"], function(pubsub) {
       // a function that will check other elements
       // in the world for collisions
 
-      item.move_old = item.move;
+/*      item.move_old = item.move;
       item.move = function(){
         console.log(arguments);
         item.move_old.apply(this, arguments);
@@ -17,8 +17,10 @@ define(["pubsub"], function(pubsub) {
       };
     });
 
+*/
+ //   Kinetic.Group.call(this, config);
 
-
+    });
   };
   return World;
 });
