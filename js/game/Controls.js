@@ -15,10 +15,11 @@ define(["pubsub"], function(pubsub) {
   };
 
   function addButton(text, callback) {
+    return;
     var btn = document.createElement("button");
     btn.innerText = text;
     btn.onclick = callback;
-    //document.getElementById("buttonPanel").appendChild(btn);
+    document.getElementById("buttonPanel").appendChild(btn);
   }
 
   addButton("Forward", forward);

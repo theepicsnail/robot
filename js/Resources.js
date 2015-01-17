@@ -13,11 +13,12 @@ define(["Kinetic"], function (K) {
    * parsed.
    */
   exports.load = function(callback) {
-    point_img = new Image();
-    exports.point_img = point_img;
-    point_img.onload = callback;
-    point_img.src = "resources/cross.png";
+    //point_img = new Image();
+    //exports.point_img = point_img;
+    //point_img.onload = callback;
+    //point_img.src = "resources/cross.png";
     //point_img.src = "resources/tile.jpg";
+    callback()
   };
 
   /*

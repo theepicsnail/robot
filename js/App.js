@@ -28,17 +28,18 @@ define(["Kinetic", "Stage", "pubsub", "Resources", "game/World", "game/Robot", "
       pubsub.subscribe("world.add", function(msg, item) {
         console.log("world.add", item);
         layer.add(item);
-        item.turn(1);
+        //item.turn(-1);
+        item.move(1);
         layer.draw();
       });
-      Stage.setScaleX(100);
-      Stage.setScaleY(100);
+      Stage.setScaleX(50);
+      Stage.setScaleY(50);
 /*      var Stage = new Kinetic.Stage({
         container:'container',
         width:500, height:500
       });*/
 
-      pubsub.publish("world.add", new Robot({x:0.5, y:0.5}));
+      pubsub.publish("world.add", new Robot({x:2.5, y:2.5}));
 
       /*
       layer.add( new Kinetic.Rect({
